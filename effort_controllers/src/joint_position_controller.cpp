@@ -58,7 +58,7 @@ bool JointPositionController::init(hardware_interface::EffortJointInterface *rob
 {
   // Get joint name from parameter server
   std::string joint_name;
-  if (!n.getParam("joint", joint_name)) 
+  if (!n.getParam("joint", joint_name))
   {
     ROS_ERROR("No joint given (namespace: %s)", n.getNamespace().c_str());
     return false;
@@ -79,8 +79,21 @@ bool JointPositionController::init(hardware_interface::EffortJointInterface *rob
   joint_ = robot->getHandle(joint_name);
 
   // Get URDF info about joint
+  std::string robot_description_key;
+  std::string robot_description;
+  if (!n.searchParam("robot_description", robot_description_key))
+  {
+    ROS_ERROR("Failed to find 'robot_description' parameter on the param server");
+    return false;
+  }
+  if (!n.getParam(robot_description_key, robot_description))
+  {
+    ROS_ERROR("Failed to retrieve '%s' from the param server", robot_description_key.c_str());
+    return false;
+  }
+
   urdf::Model urdf;
-  if (!urdf.initParam("robot_description"))
+  if (!urdf.initString(robot_description))
   {
     ROS_ERROR("Failed to parse urdf file");
     return false;
